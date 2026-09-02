@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cola Next SMO KPI Analyzer - Interactive Architecture & Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --navy-900: #071426;
+            --navy-800: #0b1e36;
+            --navy-700: #122c4d;
+            --navy-600: #1a3b63;
+            --crimson-600: #d8232a;
+            --crimson-500: #ef4444;
+            --emerald-500: #10b981;
+            --emerald-600: #059669;
+            --amber-500: #f59e0b;
+            --amber-600: #d97706;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --card-hover-shadow: 0 20px 30px -10px rgba(11, 30, 54, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--slate-900);
+            line-height: 1.6;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Top Hero Header */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-800) 60%, #16385e 100%);
+            border-radius: 20px;
+            padding: 36px 40px;
+            color: #ffffff;
+            margin-bottom: 28px;
+            box-shadow: 0 15px 35px -5px rgba(11, 30, 54, 0.3);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(216, 35, 42, 0.3) 0%, rgba(216, 35, 42, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero-badge {
+            background: rgba(216, 35, 42, 0.25);
+            color: #ff8585;
+            border: 1px solid rgba(216, 35, 42, 0.5);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .hero-subtitle {
+            color: var(--slate-400);
+            font-size: 15px;
+            margin-top: 8px;
+            max-width: 700px;
+        }
+
+        /* Navigation Tabs */
+        .tab-nav {
+            display: flex;
+            gap: 10px;
+            background: #e2e8f0;
+            padding: 6px;
+            border-radius: 14px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--slate-700);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            color: var(--navy-900);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .tab-btn.active {
+            background: var(--navy-800);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(11, 30, 54, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-2, .grid-3, .grid-4 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--slate-200);
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--navy-900);
+        }
+
+        /* Flowchart Interactive Nodes */
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .flow-step {
+            background: #ffffff;
+            border: 2px solid var(--slate-200);
+            border-radius: 14px;
+            padding: 20px 24px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .flow-step:hover, .flow-step.active {
+            border-color: var(--navy-800);
+            box-shadow: 0 8px 20px rgba(11, 30, 54, 0.1);
+            transform: translateX(6px);
+        }
+
+        .flow-step.active {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-left: 8px solid var(--navy-800);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--navy-800);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--navy-900);
+        }
+
+        .step-desc {
+            font-size: 13.5px;
+            color: var(--slate-600);
+            margin-top: 4px;
+        }
+
+        .flow-detail-panel {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid var(--slate-200);
+            box-shadow: var(--card-shadow);
+            position: sticky;
+            top: 20px;
+        }
+
+        /* Scorecard Component */
+        .scorecard {
+            border-radius: 14px;
+            padding: 18px 20px;
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-top: 5px solid var(--navy-800);
+            box-shadow: var(--card-shadow);
+        }
+
+        .scorecard-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--slate-400);
+            letter-spacing: 0.5px;
+        }
+
+        .scorecard-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--navy-900);
+            margin: 6px 0;
+        }
+
+        .scorecard-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-green { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .badge-yellow { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+        .badge-red { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+        /* Report Narrative Box */
+        .narrative-box {
+            background: #ffffff;
+            border-left: 6px solid var(--navy-800);
+            border-radius: 12px;
+            padding: 22px 26px;
+            border-top: 1px solid var(--slate-200);
+            border-right: 1px solid var(--slate-200);
+            border-bottom: 1px solid var(--slate-200);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            margin-bottom: 20px;
+        }
+
+        .narrative-p {
+            font-size: 14.5px;
+            color: var(--slate-800);
+            line-height: 1.75;
+            margin-bottom: 12px;
+        }
+
+        .narrative-p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Alert Boxes */
+        .alert-deficit {
+            background: #fef2f2;
+            border-left: 5px solid var(--crimson-500);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            color: #7f1d1d;
+        }
+
+        .alert-enhance {
+            background: #f0fdf4;
+            border-left: 5px solid var(--emerald-500);
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            color: #064e3b;
+        }
+
+        /* Interactive Select & Sliders */
+        .select-input, .slider-input {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--slate-300);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--navy-900);
+            outline: none;
+            background: #ffffff;
+        }
+
+        .select-input:focus {
+            border-color: var(--navy-800);
+            box-shadow: 0 0 0 3px rgba(11, 30, 54, 0.1);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        th {
+            background: var(--navy-800);
+            color: #ffffff;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--slate-200);
+            color: var(--slate-800);
+        }
+
+        tr:nth-child(even) {
+            background: var(--slate-100);
+        }
+
+        .btn {
+            background: var(--navy-800);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #14355c;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Top Hero Header -->
+    <div class="hero-banner">
+        <div class="hero-title">
+            <span>🥤 Cola Next SMO KPI Analyzer</span>
+            <span class="hero-badge">Interactive System Guide</span>
+        </div>
+        <div class="hero-subtitle">
+            Interactive Architecture Flowchart, Live Data Simulation & Layman Performance Intelligence Portal.
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('tab-flowchart')">🔄 1. Interactive Architecture Flowchart</button>
+        <button class="tab-btn" onclick="switchTab('tab-simulator')">👤 2. Live SMO Performance Simulator</button>
+        <button class="tab-btn" onclick="switchTab('tab-charts')">📊 3. Layman Bar Charts Explained</button>
+        <button class="tab-btn" onclick="switchTab('tab-dictionary')">📖 4. Layman KPI Dictionary</button>
+    </div>
+
+    <!-- TAB 1: INTERACTIVE FLOWCHART -->
+    <div id="tab-flowchart" class="tab-content active">
+        <!-- Easy 6-Step Visual Bar -->
+        <div style="background: #ffffff; border-radius: 16px; padding: 20px 24px; border: 1px solid var(--slate-200); box-shadow: var(--card-shadow); margin-bottom: 24px;">
+            <div style="font-size: 18px; font-weight: 800; color: var(--navy-800); margin-bottom: 12px;">🧭 Simple 6-Step Process:</div>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between;">
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px 14px; flex: 1; min-width: 150px;">
+                    <div style="font-weight: 800; color: #1d4ed8; font-size: 12px;">1. UPLOAD</div>
+                    <div style="font-size: 12.5px; color: #1e3a8a; margin-top: 4px;">Put your sales Excel file in</div>
+                </div>
+                <div style="background: #fefce8; border: 1px solid #fef08a; border-radius: 10px; padding: 12px 14px; flex: 1; min-width: 150px;">
+                    <div style="font-weight: 800; color: #a16207; font-size: 12px;">2. TARGETS</div>
+                    <div style="font-size: 12.5px; color: #713f12; margin-top: 4px;">Choose Green / Yellow / Red</div>
+                </div>
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px 14px; flex: 1; min-width: 150px;">
+                    <div style="font-weight: 800; color: #15803d; font-size: 12px;">3. CALCULATE</div>
+                    <div style="font-size: 12.5px; color: #14532d; margin-top: 4px;">Auto-checks 43 sales officers</div>
+                </div>
+                <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 10px; padding: 12px 14px; flex: 1; min-width: 150px;">
+                    <div style="font-weight: 800; color: #7e22ce; font-size: 12px;">4. CHARTS</div>
+                    <div style="font-size: 12.5px; color: #581c87; margin-top: 4px;">Simple bar charts by team</div>
+                </div>
+                <div style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 10px; padding: 12px 14px; flex: 1; min-width: 150px;">
+                    <div style="font-weight: 800; color: #be123c; font-size: 12px;">5. SINGLE SMO</div>
+                    <div style="font-size: 12.5px; color: #881337; margin-top: 4px;">6-paragraph report & gaps</div>
+                </div>
+                <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; padding: 12px 14px; flex: 1; min-width: 150px;">
+                    <div style="font-weight: 800; color: #047857; font-size: 12px;">6. DOWNLOAD</div>
+                    <div style="font-size: 12.5px; color: #064e3b; margin-top: 4px;">1-page PDF or Excel file</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Flow Steps (Left) -->
+            <div class="flow-container">
+                <div class="flow-step active" onclick="showFlowDetail(1)">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <div>
+                            <div class="step-title">Excel Ingestion & Header Scanner</div>
+                            <div class="step-desc">Auto-scans workbook sheets, discovers titled header rows, and maps 49 column aliases.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-step" onclick="showFlowDetail(2)">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <div>
+                            <div class="step-title">Data Sanitization & Grand Total Separation</div>
+                            <div class="step-desc">Isolates individual SMO records from summary rows and normalizes percentages to 0-100%.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-step" onclick="showFlowDetail(3)">
+                    <div class="step-header">
+                        <div class="step-number">3</div>
+                        <div>
+                            <div class="step-title">KPI Evaluation & Status Zones</div>
+                            <div class="step-desc">Evaluates each salesperson against Green, Yellow, and Red thresholds.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-step" onclick="showFlowDetail(4)">
+                    <div class="step-header">
+                        <div class="step-number">4</div>
+                        <div>
+                            <div class="step-title">Diagnostic Narrative & Coaching Engine</div>
+                            <div class="step-desc">Generates exact 6-paragraph narrative, identifies low gaps, and creates action plans.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-step" onclick="showFlowDetail(5)">
+                    <div class="step-header">
+                        <div class="step-number">5</div>
+                        <div>
+                            <div class="step-title">Visual Charts & PDF/Excel Export</div>
+                            <div class="step-desc">Renders layman-friendly horizontal bar charts, 1-page A4 PDF report cards, and bulk ZIP archives.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flow Detail Inspector (Right) -->
+            <div>
+                <div class="flow-detail-panel" id="flow-detail-content">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: LIVE SMO SIMULATOR -->
+    <div id="tab-simulator" class="tab-content">
+        <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+                <div class="card-title">👤 Select Sales Officer (SMO) To Inspect:</div>
+                <div style="width: 320px;">
+                    <select class="select-input" id="smoSelect" onchange="renderSMOProfile()">
+                        <option value="saad">SAAD SADDIQUE — Route: WAFAQI COLONY</option>
+                        <option value="khalid">KHALID MEHMOOD NAZ — Route: DHA KEY ACCOUNTS</option>
+                        <option value="nasir">NASIR HUSSAIN — Route: MODEL TOWN</option>
+                        <option value="asif">MUHAMMAD ASIF — Route: GULBERG</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 KPI Scorecard Row -->
+        <div class="grid-4" id="smoScorecards">
+            <!-- Injected by JS -->
+        </div>
+
+        <div class="grid-2">
+            <!-- Left: Interactive Bar Chart -->
+            <div class="card">
+                <div class="card-title" style="margin-bottom: 16px;">📊 Performance Breakdown (% of Target)</div>
+                <canvas id="smoChart" height="230"></canvas>
+            </div>
+
+            <!-- Right: Exact Diagnostic Narrative -->
+            <div>
+                <div class="narrative-box">
+                    <div style="font-size: 16px; font-weight: 800; color: var(--navy-800); margin-bottom: 12px;">
+                        📋 Standard Performance Report:
+                    </div>
+                    <div id="smoNarrativeText">
+                        <!-- Injected by JS -->
+                    </div>
+                </div>
+
+                <div class="alert-deficit" id="smoDeficitBox">
+                    <!-- Injected by JS -->
+                </div>
+
+                <div class="alert-enhance" id="smoActionBox">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: LAYMAN BAR CHARTS EXPLAINED -->
+    <div id="tab-charts" class="tab-content">
+        <div style="background: linear-gradient(135deg, #0b1e36 0%, #16385e 100%); color: #ffffff; border-radius: 16px; padding: 22px 28px; margin-bottom: 24px;">
+            <div style="font-size: 20px; font-weight: 800;">📊 Layman Visual Analytics Suite</div>
+            <div style="font-size: 13.5px; color: #94a3b8; margin-top: 4px;">
+                Simple, easy-to-understand bar charts designed for quick executive decision-making. No complex scatter plots.
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Chart 1: Target vs Actual Sales -->
+            <div class="card">
+                <div class="card-title">🎯 1. Target vs Actual Sales (By Distributor)</div>
+                <div style="height: 260px; margin: 15px 0;">
+                    <canvas id="targetVsSalesChart"></canvas>
+                </div>
+                <div style="background: #f8fafc; border-left: 4px solid var(--navy-800); padding: 12px 16px; border-radius: 8px; font-size: 13px;">
+                    💡 <b>What this represents:</b>
+                    <br>• <b>Gray Bar:</b> Monthly Target Quota (Cases).
+                    <br>• <b>Blue Bar:</b> Actual Delivered Sales (Cases).
+                    <br>• If Blue exceeds Gray, that distribution territory exceeded its quota!
+                </div>
+            </div>
+
+            <!-- Chart 2: Performance Health Zone Count -->
+            <div class="card">
+                <div class="card-title">🚦 2. Team Performance Health Zones</div>
+                <div style="height: 260px; margin: 15px 0;">
+                    <canvas id="healthZoneChart"></canvas>
+                </div>
+                <div style="background: #f8fafc; border-left: 4px solid var(--emerald-500); padding: 12px 16px; border-radius: 8px; font-size: 13px;">
+                    💡 <b>What this represents:</b>
+                    <br>• <b>Green (≥100%):</b> Star performers meeting or exceeding quota.
+                    <br>• <b>Yellow (85-99%):</b> Stable performers within reach of goal.
+                    <br>• <b>Red (<85%):</b> Sales officers requiring urgent field coaching.
+                </div>
+            </div>
+
+            <!-- Chart 3: Top vs Bottom Performers -->
+            <div class="card">
+                <div class="card-title">🏆 3. Top Champions vs Critical Watchlist (Achievement %)</div>
+                <div style="height: 260px; margin: 15px 0;">
+                    <canvas id="topBottomChart"></canvas>
+                </div>
+                <div style="background: #f8fafc; border-left: 4px solid var(--amber-500); padding: 12px 16px; border-radius: 8px; font-size: 13px;">
+                    💡 <b>What this represents:</b>
+                    <br>• Compares the highest-achieving sales officers against those with highest deficits.
+                    <br>• Green bars represent champions (>100%), Red bars represent critical recovery priorities.
+                </div>
+            </div>
+
+            <!-- Chart 4: Call Funnel -->
+            <div class="card">
+                <div class="card-title">📞 4. Route Visit & Booking Funnel (Monthly Total)</div>
+                <div style="height: 260px; margin: 15px 0;">
+                    <canvas id="callFunnelChart"></canvas>
+                </div>
+                <div style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 12px 16px; border-radius: 8px; font-size: 13px;">
+                    💡 <b>What this represents:</b>
+                    <br>• <b>Step 1 (Gray):</b> Planned Route Calls scheduled in advance.
+                    <br>• <b>Step 2 (Blue):</b> Actual Storefront Visits completed.
+                    <br>• <b>Step 3 (Green):</b> Productive Visits where a retailer placed an order.
+                </div>
+            </div>
+
+            <!-- Chart 5: Delivery Fulfillment -->
+            <div class="card">
+                <div class="card-title">🚚 5. Order Delivery Fulfillment (Cases)</div>
+                <div style="height: 260px; margin: 15px 0;">
+                    <canvas id="deliveryFulfillmentChart"></canvas>
+                </div>
+                <div style="background: #f8fafc; border-left: 4px solid var(--crimson-600); padding: 12px 16px; border-radius: 8px; font-size: 13px;">
+                    💡 <b>What this represents:</b>
+                    <br>• <b>Blue Bar:</b> Total Ordered Cases booked by sales team.
+                    <br>• <b>Green Bar:</b> Successfully Delivered Cases.
+                    <br>• <b>Red Bar:</b> Undelivered / Cancelled Cases (distribution drop-offs).
+                </div>
+            </div>
+
+            <!-- Chart 6: Field Discipline GPS -->
+            <div class="card">
+                <div class="card-title">📍 6. Geolocation & GPS Radius Accuracy (%)</div>
+                <div style="height: 260px; margin: 15px 0;">
+                    <canvas id="gpsAccuracyChart"></canvas>
+                </div>
+                <div style="background: #f8fafc; border-left: 4px solid #8b5cf6; padding: 12px 16px; border-radius: 8px; font-size: 13px;">
+                    💡 <b>What this represents:</b>
+                    <br>• Measures whether check-ins occurred inside the retailer store (PJP Radius).
+                    <br>• <b>Green (≥90%):</b> High route compliance.
+                    <br>• <b>Red (<75%):</b> Off-radius check-ins needing audit.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4: LAYMAN KPI DICTIONARY -->
+    <div id="tab-dictionary" class="tab-content">
+        <div class="card">
+            <div class="card-title" style="margin-bottom: 20px;">📖 Complete Layman KPI Dictionary</div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>KPI Name</th>
+                            <th>Plain English Meaning</th>
+                            <th>Target Standard (Green)</th>
+                            <th>Acceptable (Yellow)</th>
+                            <th>Critical (Red)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><b>Sales Achievement %</b></td>
+                            <td>How much of the monthly sales volume target was actually achieved.</td>
+                            <td><span class="scorecard-badge badge-green">≥ 100.0%</span></td>
+                            <td><span class="scorecard-badge badge-yellow">85.0% - 99.9%</span></td>
+                            <td><span class="scorecard-badge badge-red">&lt; 85.0%</span></td>
+                        </tr>
+                        <tr>
+                            <td><b>Call Completion %</b></td>
+                            <td>Percentage of scheduled retailer shop visits that were completed.</td>
+                            <td><span class="scorecard-badge badge-green">≥ 95.0%</span></td>
+                            <td><span class="scorecard-badge badge-yellow">85.0% - 94.9%</span></td>
+                            <td><span class="scorecard-badge badge-red">&lt; 85.0%</span></td>
+                        </tr>
+                        <tr>
+                            <td><b>Strike Rate %</b></td>
+                            <td>Out of the shops visited, what percentage actually placed an order.</td>
+                            <td><span class="scorecard-badge badge-green">≥ 80.0%</span></td>
+                            <td><span class="scorecard-badge badge-yellow">65.0% - 79.9%</span></td>
+                            <td><span class="scorecard-badge badge-red">&lt; 65.0%</span></td>
+                        </tr>
+                        <tr>
+                            <td><b>GPS Location Accuracy %</b></td>
+                            <td>Percentage of shop check-ins that occurred directly at the storefront.</td>
+                            <td><span class="scorecard-badge badge-green">≥ 90.0%</span></td>
+                            <td><span class="scorecard-badge badge-yellow">75.0% - 89.9%</span></td>
+                            <td><span class="scorecard-badge badge-red">&lt; 75.0%</span></td>
+                        </tr>
+                        <tr>
+                            <td><b>Delivered Cases %</b></td>
+                            <td>Percentage of ordered boxes that were successfully delivered to stores.</td>
+                            <td><span class="scorecard-badge badge-green">≥ 90.0%</span></td>
+                            <td><span class="scorecard-badge badge-yellow">80.0% - 89.9%</span></td>
+                            <td><span class="scorecard-badge badge-red">&lt; 80.0%</span></td>
+                        </tr>
+                        <tr>
+                            <td><b>Field Working Days</b></td>
+                            <td>Number of active days the salesperson worked in the field during the month.</td>
+                            <td><span class="scorecard-badge badge-green">≥ 18 Days</span></td>
+                            <td><span class="scorecard-badge badge-yellow">15 - 17 Days</span></td>
+                            <td><span class="scorecard-badge badge-red">&lt; 15 Days</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// Mock Dataset for Interactive Simulator
+const mockSMOs = {
+    saad: {
+        name: "SAAD SADDIQUE",
+        route: "WAFAQI COLONY",
+        period: "June 2026",
+        days: 16,
+        days_st: "Yellow",
+        ach: 20.0,
+        ach_st: "Red",
+        calls: 100.0,
+        call_st: "Green",
+        strike: 34.0,
+        strike_st: "Red",
+        delivery: 69.8,
+        deliv_st: "Red",
+        gps: 6.7,
+        gps_st: "Red",
+        deficits: [
+            "Sales Achievement is critically low at 20.0% (Deficit: 80.0% below target).",
+            "Order Strike Rate is low at 34.0% (Only 34.0% of visited shops placed an order).",
+            "GPS Location Accuracy is critically low at 6.7% (Most check-ins are occurring outside the shop radius).",
+            "Delivery Fulfillment is low at 69.8% (Ordered cases are not getting fully delivered)."
+        ],
+        actions: [
+            "Drive volume on high-demand core SKUs (Cola Next 1.5L / 500ml) and expand order booking per outlet.",
+            "Enhance sales pitch and store merchandising during visits to convert non-buying shops into active buyers.",
+            "Strictly ensure mobile GPS is active and complete order check-in directly at the retailer storefront.",
+            "Coordinate closely with distributor dispatch logistics to eliminate delivery drop-offs."
+        ]
+    },
+    khalid: {
+        name: "KHALID MEHMOOD NAZ",
+        route: "KEY ACCOUNTS OP - DHA",
+        period: "June 2026",
+        days: 5,
+        days_st: "Red",
+        ach: 119.0,
+        ach_st: "Green",
+        calls: 33.1,
+        call_st: "Red",
+        strike: 8.0,
+        strike_st: "Red",
+        delivery: 105.1,
+        deliv_st: "Green",
+        gps: 0.0,
+        gps_st: "Red",
+        deficits: [
+            "Call Completion is very low at 33.1% (Missed two-thirds of scheduled route stops).",
+            "Strike Rate is low at 8.0% (Key accounts order large bulk volumes but visit count is low).",
+            "GPS accuracy is 0.0% (PJP coordinates need updating)."
+        ],
+        actions: [
+            "Enforce daily field route schedule and regular visit sequence.",
+            "Calibrate mobile app GPS coordinates for institutional key accounts."
+        ]
+    },
+    nasir: {
+        name: "NASIR HUSSAIN",
+        route: "MODEL TOWN",
+        period: "June 2026",
+        days: 18,
+        days_st: "Green",
+        ach: 81.0,
+        ach_st: "Yellow",
+        calls: 96.0,
+        call_st: "Green",
+        strike: 72.0,
+        strike_st: "Yellow",
+        delivery: 88.0,
+        deliv_st: "Yellow",
+        gps: 93.5,
+        gps_st: "Green",
+        deficits: [
+            "Sales Achievement is in yellow zone at 81.0% (Need 19.0% boost to cross 100%).",
+            "Strike Rate is 72.0% (Close to green target of 80%)."
+        ],
+        actions: [
+            "Upsell flavor variants (Next Lemon / Cola Fizz) to push total invoice value across target.",
+            "Maintain strong GPS and visit discipline."
+        ]
+    },
+    asif: {
+        name: "MUHAMMAD ASIF",
+        route: "GULBERG",
+        period: "June 2026",
+        days: 17,
+        days_st: "Yellow",
+        ach: 43.0,
+        ach_st: "Red",
+        calls: 88.0,
+        call_st: "Yellow",
+        strike: 48.0,
+        strike_st: "Red",
+        delivery: 78.0,
+        deliv_st: "Red",
+        gps: 71.0,
+        gps_st: "Red",
+        deficits: [
+            "Sales Achievement is low at 43.0%.",
+            "Strike Rate is low at 48.0%.",
+            "GPS Accuracy is below standard at 71.0%."
+        ],
+        actions: [
+            "Conduct joint field work with Territory Supervisor to improve retail order size.",
+            "Audit retailer database to eliminate inactive or closed shops."
+        ]
+    }
+};
+
+const flowStepDetails = {
+    1: {
+        title: "Step 1: Ingestion & Auto-Detection",
+        code: "find_excel_header(excel_file, rows_to_scan=30)",
+        description: "The Excel engine scans the first 30 rows of every sheet in the workbook to detect where the actual column headings begin (handling row 0 title banners). It matches column names against a dictionary of 49 known canonical aliases (such as 'SMO Name', 'Ach.%', 'Strike Rate %')."
+    },
+    2: {
+        title: "Step 2: Cleaning & Total Row Isolation",
+        code: "clean_and_transform_dataset(df_raw)",
+        description: "Standardizes column data types, parses strings, cleans numeric values, converts decimals (0.20 to 20%), and automatically detects and separates Grand Total summary rows from active sales officer records."
+    },
+    3: {
+        title: "Step 3: KPI Performance Scoring",
+        code: "get_status(value, green_threshold, yellow_threshold)",
+        description: "Compares each metric against configured thresholds: Green (Target Met), Yellow (Acceptable), and Red (Deficit / Needs Coaching). Also assigns overall Performance Tiers: Elite Champion, On-Track, Watchlist, or Critical."
+    },
+    4: {
+        title: "Step 4: Diagnostic Narrative & Action Plan",
+        code: "generate_smo_narrative(smo, team_stats, thresholds)",
+        description: "Generates the standardized 6-paragraph executive summary, pinpoints exact shortfall percentages under 'Where We Are Low', and outputs tailored coaching action items under 'What To Enhance'."
+    },
+    5: {
+        title: "Step 5: Visual Bar Charts & Document Exports",
+        code: "create_smo_pdf(), generate_batch_pdf_zip(), create_executive_excel_workbook()",
+        description: "Creates clean, layman-friendly horizontal bar charts with plain English explanations, renders 1-page printable A4 PDF report cards with ReportLab, and builds multi-sheet formatted Excel spreadsheets."
+    }
+};
+
+let smoChartInstance = null;
+
+function showFlowDetail(stepNum) {
+    document.querySelectorAll('.flow-step').forEach((el, idx) => {
+        el.classList.toggle('active', idx + 1 === stepNum);
+    });
+
+    const detail = flowStepDetails[stepNum];
+    document.getElementById('flow-detail-content').innerHTML = `
+        <div style="font-size: 12px; font-weight: 700; color: var(--crimson-600); text-transform: uppercase; letter-spacing: 1px;">Workflow Inspection</div>
+        <div style="font-size: 22px; font-weight: 800; color: var(--navy-800); margin: 6px 0 14px 0;">${detail.title}</div>
+        <div style="background: var(--slate-900); color: #38bdf8; padding: 12px 16px; border-radius: 8px; font-family: monospace; font-size: 13px; margin-bottom: 16px;">
+            ${detail.code}
+        </div>
+        <div style="font-size: 14.5px; color: var(--slate-700); line-height: 1.7;">
+            ${detail.description}
+        </div>
+    `;
+}
+
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+    event.currentTarget.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+
+    if (tabId === 'tab-charts') {
+        renderLaymanCharts();
+    }
+}
+
+function renderSMOProfile() {
+    const key = document.getElementById('smoSelect').value;
+    const smo = mockSMOs[key];
+
+    // Scorecards
+    const badge = (st) => `<span class="scorecard-badge badge-${st.toLowerCase()}">${st.toUpperCase()}</span>`;
+    document.getElementById('smoScorecards').innerHTML = `
+        <div class="scorecard" style="border-top-color: ${smo.ach_st === 'Green' ? '#10b981' : (smo.ach_st === 'Yellow' ? '#f59e0b' : '#ef4444')};">
+            <div class="scorecard-title">Sales Achievement</div>
+            <div class="scorecard-value">${smo.ach.toFixed(1)}%</div>
+            ${badge(smo.ach_st)}
+        </div>
+        <div class="scorecard" style="border-top-color: ${smo.call_st === 'Green' ? '#10b981' : (smo.call_st === 'Yellow' ? '#f59e0b' : '#ef4444')};">
+            <div class="scorecard-title">Shop Visits Done</div>
+            <div class="scorecard-value">${smo.calls.toFixed(1)}%</div>
+            ${badge(smo.call_st)}
+        </div>
+        <div class="scorecard" style="border-top-color: ${smo.strike_st === 'Green' ? '#10b981' : (smo.strike_st === 'Yellow' ? '#f59e0b' : '#ef4444')};">
+            <div class="scorecard-title">Order Strike Rate</div>
+            <div class="scorecard-value">${smo.strike.toFixed(1)}%</div>
+            ${badge(smo.strike_st)}
+        </div>
+        <div class="scorecard" style="border-top-color: ${smo.gps_st === 'Green' ? '#10b981' : (smo.gps_st === 'Yellow' ? '#f59e0b' : '#ef4444')};">
+            <div class="scorecard-title">GPS Accuracy</div>
+            <div class="scorecard-value">${smo.gps.toFixed(1)}%</div>
+            ${badge(smo.gps_st)}
+        </div>
+    `;
+
+    // 6-Paragraph Narrative Text
+    document.getElementById('smoNarrativeText').innerHTML = `
+        <p class="narrative-p">This report summarizes ${smo.name}'s performance in ${smo.period} while working on the ${smo.route} route.</p>
+        <p class="narrative-p">${smo.name} worked ${smo.days} days during the month, which places them in the ${smo.days_st.toLowerCase()} performance zone.</p>
+        <p class="narrative-p">In terms of results, their Achievement stood at ${smo.ach.toFixed(1)}%, resulting in a ${smo.ach_st.toLowerCase()} performance classification.</p>
+        <p class="narrative-p">Their Call Completion reached ${smo.calls.toFixed(1)}%, which falls within the ${smo.call_st.toLowerCase()} zone, while their Strike Rate of ${smo.strike.toFixed(1)}% placed them in the ${smo.strike_st.toLowerCase()} performance zone.</p>
+        <p class="narrative-p">On the delivery side, ${smo.name}'s Delivered Cases percentage was ${smo.delivery.toFixed(1)}%, resulting in a ${smo.deliv_st.toLowerCase()} classification.</p>
+        <p class="narrative-p">Lastly, their GPS Accuracy was ${smo.gps.toFixed(1)}%, which falls within the ${smo.gps_st.toLowerCase()} performance zone.</p>
+    `;
+
+    // Deficit Box
+    document.getElementById('smoDeficitBox').innerHTML = `
+        <div style="font-weight: 800; font-size: 14px; margin-bottom: 6px;">📉 Where We Are Getting Low:</div>
+        <ul style="margin-left: 20px; font-size: 13px;">
+            ${smo.deficits.map(d => `<li>${d}</li>`).join('')}
+        </ul>
+    `;
+
+    // Action Box
+    document.getElementById('smoActionBox').innerHTML = `
+        <div style="font-weight: 800; font-size: 14px; margin-bottom: 6px;">⚡ What To Enhance (Action Plan):</div>
+        <ul style="margin-left: 20px; font-size: 13px;">
+            ${smo.actions.map(a => `<li>${a}</li>`).join('')}
+        </ul>
+    `;
+
+    // Single SMO Chart with benchmarks
+    const ctx = document.getElementById('smoChart').getContext('2d');
+    if (smoChartInstance) smoChartInstance.destroy();
+
+    const chartColors = [
+        smo.ach >= 100 ? '#10b981' : (smo.ach >= 85 ? '#f59e0b' : '#ef4444'),
+        smo.calls >= 95 ? '#10b981' : (smo.calls >= 85 ? '#f59e0b' : '#ef4444'),
+        smo.strike >= 80 ? '#10b981' : (smo.strike >= 65 ? '#f59e0b' : '#ef4444'),
+        smo.gps >= 90 ? '#10b981' : (smo.gps >= 75 ? '#f59e0b' : '#ef4444'),
+        smo.delivery >= 90 ? '#10b981' : (smo.delivery >= 80 ? '#f59e0b' : '#ef4444')
+    ];
+
+    smoChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Achievement %', 'Call Comp. %', 'Strike Rate %', 'GPS Accuracy %', 'Delivered %'],
+            datasets: [{
+                label: 'Score %',
+                data: [smo.ach, smo.calls, smo.strike, smo.gps, smo.delivery],
+                backgroundColor: chartColors,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { max: 120, grid: { color: '#f1f5f9' }, ticks: { callback: v => v + '%' } },
+                y: { grid: { display: false } }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+}
+
+// Chart Suite Instances
+let charts = {};
+
+function renderLaymanCharts() {
+    // 1. Target vs Sales
+    if (!charts.targetSales) {
+        const ctx1 = document.getElementById('targetVsSalesChart').getContext('2d');
+        charts.targetSales = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['GULBERG DIST.', 'MODEL TOWN DIST.', 'DHA DIST.', 'CANTT DIST.'],
+                datasets: [
+                    { label: 'Target Cases (Goal)', data: [145000, 160000, 130000, 152000], backgroundColor: '#cbd5e1', borderRadius: 6 },
+                    { label: 'Actual Sales Cases', data: [62000, 78000, 48000, 38671], backgroundColor: '#0b1e36', borderRadius: 6 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { grid: { color: '#f1f5f9' }, ticks: { callback: v => (v/1000) + 'k' } }, x: { grid: { display: false } } }
+            }
+        });
+    }
+
+    // 2. Health Zone
+    if (!charts.health) {
+        const ctx2 = document.getElementById('healthZoneChart').getContext('2d');
+        charts.health = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: ['Green (Goal Met ≥100%)', 'Yellow (Average 85-99%)', 'Red (Deficit <85%)'],
+                datasets: [{
+                    data: [1, 2, 40],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // 3. Top vs Bottom
+    if (!charts.topBottom) {
+        const ctx3 = document.getElementById('topBottomChart').getContext('2d');
+        charts.topBottom = new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: ['KHALID MEHMOOD (DHA)', 'NASIR HUSSAIN (MT)', 'MUHAMMAD ASIF (GUL)', 'SAAD SADDIQUE (WF)'],
+                datasets: [{
+                    label: 'Achievement %',
+                    data: [119.0, 81.0, 43.0, 20.0],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#ef4444'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { x: { max: 130, grid: { color: '#f1f5f9' }, ticks: { callback: v => v + '%' } }, y: { grid: { display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // 4. Call Funnel
+    if (!charts.funnel) {
+        const ctx4 = document.getElementById('callFunnelChart').getContext('2d');
+        charts.funnel = new Chart(ctx4, {
+            type: 'bar',
+            data: {
+                labels: ['Planned Calls (PJP)', 'Actual Visits Made', 'Productive Orders Booked'],
+                datasets: [{
+                    data: [32450, 28120, 11430],
+                    backgroundColor: ['#94a3b8', '#0b1e36', '#10b981'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { grid: { color: '#f1f5f9' }, ticks: { callback: v => (v/1000) + 'k' } }, x: { grid: { display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    // 5. Delivery Supply Chain
+    if (!charts.delivery) {
+        const ctx5 = document.getElementById('deliveryFulfillmentChart').getContext('2d');
+        charts.delivery = new Chart(ctx5, {
+            type: 'bar',
+            data: {
+                labels: ['GULBERG', 'MODEL TOWN', 'DHA', 'CANTT'],
+                datasets: [
+                    { label: 'Delivered Cases', data: [58000, 72000, 46000, 35000], backgroundColor: '#10b981', borderRadius: 6 },
+                    { label: 'Undelivered Cases', data: [4000, 6000, 2000, 3671], backgroundColor: '#ef4444', borderRadius: 6 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { stacked: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => (v/1000) + 'k' } }, x: { stacked: true, grid: { display: false } } }
+            }
+        });
+    }
+
+    // 6. Field GPS Compliance
+    if (!charts.gps) {
+        const ctx6 = document.getElementById('gpsAccuracyChart').getContext('2d');
+        charts.gps = new Chart(ctx6, {
+            type: 'bar',
+            data: {
+                labels: ['MODEL TOWN (93.5%)', 'GULBERG (71.0%)', 'CANTT (42.0%)', 'WAFAQI (6.7%)'],
+                datasets: [{
+                    data: [93.5, 71.0, 42.0, 6.7],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#ef4444'],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { x: { max: 100, grid: { color: '#f1f5f9' }, ticks: { callback: v => v + '%' } }, y: { grid: { display: false } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+}
+
+// Initialize on Load
+showFlowDetail(1);
+renderSMOProfile();
+</script>
+
+</body>
+</html>

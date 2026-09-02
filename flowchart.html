@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cola Next SMO KPI Analyzer - Easy Visual Flowchart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy-900: #071426;
+            --navy-800: #0b1e36;
+            --navy-700: #122c4d;
+            --crimson-600: #d8232a;
+            --emerald-500: #10b981;
+            --amber-500: #f59e0b;
+            --blue-500: #3b82f6;
+            --purple-500: #8b5cf6;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: var(--slate-900);
+            line-height: 1.6;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Top Brand Hero Banner */
+        .hero {
+            background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-800) 60%, #16385e 100%);
+            border-radius: 20px;
+            padding: 36px 40px;
+            color: #ffffff;
+            margin-bottom: 36px;
+            box-shadow: 0 15px 35px -5px rgba(11, 30, 54, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -10%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(216, 35, 42, 0.25) 0%, rgba(216, 35, 42, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .hero p {
+            color: var(--slate-300);
+            font-size: 15px;
+            max-width: 650px;
+            margin: 0 auto 18px auto;
+        }
+
+        .hero-tag {
+            background: rgba(216, 35, 42, 0.25);
+            color: #ff8585;
+            border: 1px solid rgba(216, 35, 42, 0.5);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        /* Flowchart Steps Canvas */
+        .flow-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 40px;
+        }
+
+        .step-card {
+            background: #ffffff;
+            border-radius: 18px;
+            border: 2px solid var(--slate-200);
+            padding: 24px 30px;
+            width: 100%;
+            max-width: 780px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .step-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(11, 30, 54, 0.1);
+            border-color: var(--navy-800);
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .step-badge {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+            font-weight: 800;
+        }
+
+        .badge-1 { background: #eff6ff; color: #1d4ed8; border: 2px solid #bfdbfe; }
+        .badge-2 { background: #fefce8; color: #a16207; border: 2px solid #fef08a; }
+        .badge-3 { background: #f0fdf4; color: #15803d; border: 2px solid #bbf7d0; }
+        .badge-4 { background: #faf5ff; color: #7e22ce; border: 2px solid #e9d5ff; }
+        .badge-5 { background: #fff1f2; color: #be123c; border: 2px solid #fecdd3; }
+        .badge-6 { background: #ecfdf5; color: #047857; border: 2px solid #a7f3d0; }
+
+        .step-content {
+            flex-grow: 1;
+        }
+
+        .step-num {
+            font-size: 11.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--slate-600);
+            margin-bottom: 2px;
+        }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--navy-900);
+        }
+
+        .step-desc {
+            font-size: 14px;
+            color: var(--slate-600);
+            margin-top: 4px;
+        }
+
+        /* Expanding Detail Box */
+        .step-details {
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--slate-200);
+            font-size: 13.5px;
+            color: var(--slate-700);
+            display: none;
+            background: #f8fafc;
+            padding: 16px 20px;
+            border-radius: 12px;
+        }
+
+        .step-card.active .step-details {
+            display: block;
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Flow Connecting Arrow */
+        .flow-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 8px 0;
+            color: var(--slate-400);
+        }
+
+        .arrow-line {
+            width: 3px;
+            height: 24px;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+
+        .arrow-head {
+            width: 0; 
+            height: 0; 
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 8px solid #cbd5e1;
+            margin-top: -1px;
+        }
+
+        /* Bottom Controls */
+        .action-bar {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: var(--navy-800);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(11, 30, 54, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #14355c;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(11, 30, 54, 0.3);
+        }
+
+        .hint {
+            font-size: 12.5px;
+            color: var(--slate-600);
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Hero Header -->
+    <div class="hero">
+        <span class="hero-tag">Layman Process Guide</span>
+        <h1>🥤 How the KPI Analyzer Works</h1>
+        <p>A super simple, 6-step walkthrough showing what happens to your data from Excel upload to 1-page PDF reports.</p>
+    </div>
+
+    <!-- 6-Step Easy Flowchart -->
+    <div class="flow-wrapper">
+
+        <!-- STEP 1 -->
+        <div class="step-card active" onclick="toggleStep(this)">
+            <div class="step-header">
+                <div class="step-badge badge-1">📂</div>
+                <div class="step-content">
+                    <div class="step-num">Step 1 of 6</div>
+                    <div class="step-title">Upload Your Excel Sales Report</div>
+                    <div class="step-desc">Drag and drop your monthly sales file (.xlsx) onto the home screen.</div>
+                </div>
+            </div>
+            <div class="step-details">
+                <b>💡 What happens here:</b> You provide your sales spreadsheet (such as <code>SMO July Report.xlsx</code>). If you don't have a file ready, you can click the quick demo button to test with sample data immediately.
+            </div>
+        </div>
+
+        <div class="flow-arrow">
+            <div class="arrow-line"></div>
+            <div class="arrow-head"></div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step-card" onclick="toggleStep(this)">
+            <div class="step-header">
+                <div class="step-badge badge-2">⚙️</div>
+                <div class="step-content">
+                    <div class="step-num">Step 2 of 6</div>
+                    <div class="step-title">Choose Your Target Standards</div>
+                    <div class="step-desc">Set what counts as Green (Good), Yellow (Average), and Red (Low).</div>
+                </div>
+            </div>
+            <div class="step-details">
+                <b>💡 What happens here:</b> In the sidebar, you set target levels (e.g., <b>100%</b> for Green sales goal, <b>85%</b> for Yellow). The app validates your inputs so Yellow is never set higher than Green.
+            </div>
+        </div>
+
+        <div class="flow-arrow">
+            <div class="arrow-line"></div>
+            <div class="arrow-head"></div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step-card" onclick="toggleStep(this)">
+            <div class="step-header">
+                <div class="step-badge badge-3">🧹</div>
+                <div class="step-content">
+                    <div class="step-num">Step 3 of 6</div>
+                    <div class="step-title">Automatic Calculations & Data Cleaning</div>
+                    <div class="step-desc">The app reads all 43 sales officers, calculates percentages, and separates totals.</div>
+                </div>
+            </div>
+            <div class="step-details">
+                <b>💡 What happens here:</b> The program scans rows to find headings automatically, handles missing values, normalizes decimals (e.g. 0.20 ➔ 20%), separates summary rows, and assigns status colors (Green, Yellow, Red) to all sales officers.
+            </div>
+        </div>
+
+        <div class="flow-arrow">
+            <div class="arrow-line"></div>
+            <div class="arrow-head"></div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="step-card" onclick="toggleStep(this)">
+            <div class="step-header">
+                <div class="step-badge badge-4">📊</div>
+                <div class="step-content">
+                    <div class="step-num">Step 4 of 6</div>
+                    <div class="step-title">Explore Simple Team Bar Charts</div>
+                    <div class="step-desc">See Target vs Actual Sales and overall health in clear, layman-friendly charts.</div>
+                </div>
+            </div>
+            <div class="step-details">
+                <b>💡 What happens here:</b> No complex scatter plots! You get simple horizontal bar charts showing target quota (Gray) vs sales made (Blue), plus counts of sales officers in Green, Yellow, and Red performance zones.
+            </div>
+        </div>
+
+        <div class="flow-arrow">
+            <div class="arrow-line"></div>
+            <div class="arrow-head"></div>
+        </div>
+
+        <!-- STEP 5 -->
+        <div class="step-card" onclick="toggleStep(this)">
+            <div class="step-header">
+                <div class="step-badge badge-5">👤</div>
+                <div class="step-content">
+                    <div class="step-num">Step 5 of 6</div>
+                    <div class="step-title">Inspect Individual Sales Officer (SMO) Profile</div>
+                    <div class="step-desc">Read their 6-paragraph summary, exact deficits, and action plan.</div>
+                </div>
+            </div>
+            <div class="step-details">
+                <b>💡 What happens here:</b> Pick any salesperson (like <i>SAAD SADDIQUE</i>) to see their exact 6-paragraph diagnostic report, a list of <b>Where We Are Low</b> (specific percentage gaps), and <b>What To Enhance</b> (coaching action steps).
+            </div>
+        </div>
+
+        <div class="flow-arrow">
+            <div class="arrow-line"></div>
+            <div class="arrow-head"></div>
+        </div>
+
+        <!-- STEP 6 -->
+        <div class="step-card" onclick="toggleStep(this)">
+            <div class="step-header">
+                <div class="step-badge badge-6">📄</div>
+                <div class="step-content">
+                    <div class="step-num">Step 6 of 6</div>
+                    <div class="step-title">Download 1-Page PDF & Excel Reports</div>
+                    <div class="step-desc">Download printable PDF report cards or the entire team in a ZIP file.</div>
+                </div>
+            </div>
+            <div class="step-details">
+                <b>💡 What happens here:</b> Click one button to download a high-resolution, print-ready 1-page A4 PDF report card, download a ZIP archive with individual PDFs for all sales officers, or download a complete Excel summary workbook.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <a href="http://localhost:8501" target="_blank" class="btn">🚀 Open Live Streamlit App (http://localhost:8501)</a>
+        <div class="hint">Click any card above to expand or collapse details.</div>
+    </div>
+
+</div>
+
+<script>
+    function toggleStep(card) {
+        card.classList.toggle('active');
+    }
+</script>
+
+</body>
+</html>
